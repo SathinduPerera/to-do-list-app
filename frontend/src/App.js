@@ -1,10 +1,32 @@
 import { Link } from 'react-router-dom';
 import './App.css';
+import { useRef } from 'react';
 
 export function TaskEnter(){
 
+  const task = useRef()
+  const taskDesc = useRef()
+  const deadline = useRef()
+  
   function submit(e) {
     e.preventDefault()
+  }
+
+
+
+  function addtask(){
+    let taskObj = {
+      Task : task.current.value,
+      TaskDesc: taskDesc.current.value,
+      Deadline: deadline.current.value
+    }
+
+    fetch("api/post", {
+      method: "post", 
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(taskObj)
+    }).then((response) => response.json()).then((data) => {console.log(data.message)})
+    
   }
 
   return (
@@ -16,20 +38,22 @@ export function TaskEnter(){
         <h1>Add Task</h1>
         <form onSubmit={submit}>
           <div id='taskNamediv' className='taskFormdata'>
-          <label htmlFor='taskName'>Task Name : </label>
-          <input id='taskName' type='text'></input>
+            <label htmlFor='taskName'>Task Name : </label>
+            <input id='taskName' type='text' ref={task}></input>
           </div>
           <div id="taskDescdiv" className='taskFormdata'>
-          <label htmlFor='taskDesc'>Task Description : </label>
-          <textarea id='taskDesc'></textarea>
+            <label htmlFor='taskDesc'>Task Description : </label>
+            <textarea id='taskDesc' ref={taskDesc}></textarea>
           </div>
           <div id="deadlineDiv" className='taskFormdata'>
-          <label htmlFor='deadline'>Deadline : </label>
-          <input id='deadline' type="datetime-local"></input>
+            <label htmlFor='deadline'>Deadline : </label>
+            <input id='deadline' type="datetime-local" ref={deadline}></input>
           </div>
-          <button>Add task</button>
-          <button>Add another task</button>
-          <button>Back to home</button>
+            <div id="deadlineDiv" className='taskFormdata'>
+            <button onClick={addtask}>Add task</button>
+            <button onClick={addtask}>Add another task</button>
+            <Link to={"/"}><button>Back to home</button></Link>
+          </div>
         </form>
       </div>
     </div>
