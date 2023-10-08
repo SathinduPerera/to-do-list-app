@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import './App.css';
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export function TaskEnter(){
 
@@ -62,7 +62,14 @@ export function TaskEnter(){
 
 export function App() {
 
-  let tasks
+  let [tasks, settasks] = useState([{}]);
+
+  useEffect(() => {
+    fetch("/api").then(response => response.json()).then(data => {
+      settasks(data)
+      console.log(data)
+      })
+  }, [])
 
   return (
     <div className="App">
@@ -72,7 +79,7 @@ export function App() {
       <div>
         {typeof tasks === "undefined"? <p>No tasks</p> : 
         tasks.map((item, index) => (
-          <p key={index}>{item}</p>
+          <p key={index}>{item.name}</p>
         ))}
       </div>
     </div>

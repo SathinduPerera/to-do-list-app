@@ -28,7 +28,16 @@ app.post("/api/post", (req, res) => {
     res.json({"message" : "Data recived successfully"})
 })
 
-
+app.get("/api", (req, res) => {
+    sql = `SELECT * FROM tasks`
+    db.all(sql, (err, data) => {
+        if(err){
+            console.error(err.message)
+        } else {
+            res.json(data)
+        }
+    });
+})
 
 
 
