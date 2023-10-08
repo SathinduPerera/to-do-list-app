@@ -21,11 +21,15 @@ export function TaskEnter(){
       Deadline: deadline.current.value.replace("T", " ")
     }
 
-    fetch("api/post", {
-      method: "post", 
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify(taskObj)
-    }).then((response) => response.json()).then((data) => {console.log(data.message)})
+    if(taskObj.Task !== "" && taskObj.Deadline !== ""){   
+      fetch("api/post", {
+        method: "post", 
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(taskObj)
+      }).then((response) => response.json()).then((data) => {console.log(data.message)})
+    }else{
+      alert("Please Fill the task form completely")
+    }
     
   }
 
@@ -39,7 +43,7 @@ export function TaskEnter(){
         <form onSubmit={submit}>
           <div id='taskNamediv' className='taskFormdata'>
             <label htmlFor='taskName'>Task Name : </label>
-            <input id='taskName' type='text' ref={task} required></input>
+            <input id='taskName' type='text' ref={task}></input>
           </div>
           <div id="taskDescdiv" className='taskFormdata'>
             <label htmlFor='taskDesc'>Task Description : </label>
@@ -77,10 +81,12 @@ export function App() {
         <Link to={"/AddTask"}><button>Add task</button></Link>
       </div>
       <div>
+        <ol>
         {typeof tasks === "undefined"? <p>No tasks</p> : 
         tasks.map((item, index) => (
-          <p key={index}>{item.name}</p>
+          <li key={index}>{item.name} - {item.description === ""? "No Description" : item.description} - {item.deadline}</li>
         ))}
+        </ol>
       </div>
     </div>
   );
