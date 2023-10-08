@@ -18,7 +18,7 @@ export function TaskEnter(){
     let taskObj = {
       Task : task.current.value,
       TaskDesc: taskDesc.current.value,
-      Deadline: deadline.current.value
+      Deadline: deadline.current.value.replace("T", " ")
     }
 
     fetch("api/post", {
@@ -39,7 +39,7 @@ export function TaskEnter(){
         <form onSubmit={submit}>
           <div id='taskNamediv' className='taskFormdata'>
             <label htmlFor='taskName'>Task Name : </label>
-            <input id='taskName' type='text' ref={task}></input>
+            <input id='taskName' type='text' ref={task} required></input>
           </div>
           <div id="taskDescdiv" className='taskFormdata'>
             <label htmlFor='taskDesc'>Task Description : </label>
