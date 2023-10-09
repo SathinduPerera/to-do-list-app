@@ -66,14 +66,19 @@ export function TaskEnter(){
 
 export function App() {
 
-  let [tasks, settasks] = useState([{}]);
+  const [tasks, settasks] = useState([{}]);
 
-  useEffect(() => {
+  function fetchTasks() {
     fetch("/api").then(response => response.json()).then(data => {
       settasks(data)
-      console.log(data)
       })
+  }
+
+  useEffect(() => {
+    fetchTasks()
   }, [])
+
+
 
   return (
     <div className="App">
@@ -84,7 +89,20 @@ export function App() {
         <ol>
         {typeof tasks === "undefined"? <p>No tasks</p> : 
         tasks.map((item, index) => (
-          <li key={index}>{item.name} - {item.description === ""? "No Description" : item.description} - {item.deadline}</li>
+          <li key={index}>{item.name} - {item.description === ""? "No Description" : item.description} - {item.deadline} - {item.status} 
+            <span id='taskControls'><input type='checkbox'/><button>Edit</button><button onClick={() => {
+              if(window.confirm('Do you want to delete')){
+                fetch("/api/delete", {
+                  method: "post",
+                  headers: {"Content-Type" : "application/json"},
+                  body: JSON.stringify({"id": item.id})
+                }).then(response => response.json()).then(data => console.log(data))
+                fetchTasks();
+              } else {
+                window.alert("Task not deleted")
+              }
+            }}>Delete</button></span>
+          </li>
         ))}
         </ol>
       </div>

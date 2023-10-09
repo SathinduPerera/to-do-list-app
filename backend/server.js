@@ -39,6 +39,16 @@ app.get("/api", (req, res) => {
     });
 })
 
+app.post("/api/delete", (req, res) => {
+    sql = "DELETE FROM tasks WHERE id = ?"
+    db.run(sql, [req.body.id], (err) => {
+        if(err){
+            console.log(err.message)
+        }
+    })
+    res.json({"message" : "data deleted properly"})
+
+})
 
 
 
