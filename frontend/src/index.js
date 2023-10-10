@@ -9,7 +9,7 @@ root.render(
   <BrowserRouter>
     <Routes>
       <Route path='/' element={<App />}/>
-      <Route path='/AddTask' element={<TaskEnter/>}/>
+      <Route path='/AddTask' element={<TaskEnter />}/>
     </Routes>
   </BrowserRouter>
 );

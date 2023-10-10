@@ -30,7 +30,7 @@ app.post("/api/post", (req, res) => {
 
 app.get("/api", (req, res) => {
     sql = `SELECT * FROM tasks`
-    db.all(sql, (err, data) => {
+    db.all(sql, [], (err, data) => { // error is passed first then data 
         if(err){
             console.error(err.message)
         } else {
@@ -48,6 +48,17 @@ app.post("/api/delete", (req, res) => {
     })
     res.json({"message" : "data deleted properly"})
 
+})
+
+app.post("/api/edit", (req, res) => {
+    sql = `SELECT * FROM tasks WHERE id = ?`
+    db.all(sql, [req.body.id], (err, data) => {
+        if(err) {
+            console.log(err.message)
+        } else {
+            res.json(data)
+        }       
+    })
 })
 
 
