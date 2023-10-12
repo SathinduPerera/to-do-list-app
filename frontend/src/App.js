@@ -3,7 +3,7 @@ import './App.css';
 import React, { useEffect, useRef, useState } from 'react';
 
 
-export function TaskEnter({defaultTask, defaultDesc, defaultDeadline, postLocation}){
+export function TaskEnter(){
 
   const task = useRef()
   const taskDesc = useRef()
@@ -17,7 +17,7 @@ export function TaskEnter({defaultTask, defaultDesc, defaultDeadline, postLocati
     }
 
     if(taskObj.Task !== "" && taskObj.Deadline !== ""){   
-      fetch(postLocation, {
+      fetch("/api/post", {
         method: "post", 
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(taskObj)
@@ -59,7 +59,7 @@ export function TaskEnter({defaultTask, defaultDesc, defaultDeadline, postLocati
   )
 }
 
-function ModifyTask({defaultTask, defaultDesc, defaultDeadline}){
+function ModifyTask({defaultTask, defaultDesc, defaultDeadline, id}){
 
   const newTask = useRef();
   const newDesc = useRef();
@@ -67,21 +67,43 @@ function ModifyTask({defaultTask, defaultDesc, defaultDeadline}){
 
   return(
     <div>
+      <form onSubmit={(e) => {e.preventDefault()}}>
       <div id='taskNamediv' className='taskFormdata'>
             <label htmlFor='taskName'>Task Name : </label>
-            <input id='taskName' type='text' ref={newTask} defaultValue={defaultTask} autoFocus placeholder='Add Task'></input>
+            <input id='taskName' type='text' ref={newTask}  autoFocus placeholder='Add Task' defaultValue={defaultTask}></input>
           </div>
           <div id="taskDescdiv" className='taskFormdata'>
-            <label htmlFor='taskDesc' defaultValue>Task Description : </label>
-            <textarea id='taskDesc' ref={newDesc} defaultValue={defaultDesc} placeholder='Enter short Descrition'></textarea>
+            <label htmlFor='taskDesc'>Task Description : </label>
+            <textarea id='modifiedtaskDesc' ref={newDesc} placeholder='Enter short Descrition' defaultValue={defaultDesc}></textarea>
           </div>
           <div id="deadlineDiv" className='taskFormdata'>
             <label htmlFor='deadline'>Deadline : </label>
             <input id='deadline' type="datetime-local" ref={newDeadline} defaultValue={defaultDeadline}></input>
           </div> 
           <div>
-            <button>Save</button>
-          </div>     
+            <button type='reset' onClick={() => {
+
+              let modifyObj = {
+                Task : newTask.current.value,
+                Desc : newDesc.current.value,
+                Deadline : newDeadline.current.value.replace("T", " "),
+                Id : id
+              }
+
+              fetch("/api/edit/post", {
+                method: "post",
+                headers: {"Content-Type" : "application/json"},
+                body: JSON.stringify(modifyObj)
+              }).then(response => response.json()).then(data => {
+                document.getElementById("ModifyTaskDiv").style.display = "none";
+                window.alert(data.message)
+              })
+            }}>Save</button>
+            <button type='reset' onClick={() => {
+              document.getElementById("ModifyTaskDiv").style.display = "none";
+            }}>Cancel</button>
+          </div> 
+          </form>    
     </div>
   )
 }
@@ -91,6 +113,7 @@ export function App() {
   const [tasks, settasks] = useState([{}]);
 
   const [modifyTasks, setmodifyTasks] = useState([{}])
+  const [edit, setedit] = useState(false)
 
   function fetchTasks() {
     fetch("/api").then(response => response.json()).then(data => {
@@ -101,8 +124,6 @@ export function App() {
   useEffect(() => {
     fetchTasks()
   }, [])
-
-
 
   return (
     <div className="App">
@@ -115,17 +136,23 @@ export function App() {
         tasks.map((item, index) => (
           <li key={index}>{item.name} - {item.description === ""? "No Description" : item.description} - {item.deadline} - {item.status} 
             <span id='taskControls'><input type='checkbox'/>
+
+            {/* Edit button */}
             <button onClick={() => {
-              console.log(item.name)
               fetch("/api/edit", {
                 method: "post",
                 headers: {"Content-Type" : "application/json"},
                 body: JSON.stringify({"id" : item.id})
               }).then(response => response.json()).then(data => {
-                setmodifyTasks(data)
-                console.log(modifyTasks[0].name)
+                setmodifyTasks(data);
               })
+              setedit(true)
+              if(document.getElementById("ModifyTaskDiv") !== null) {
+                document.getElementById("ModifyTaskDiv").style.display = "block"
+              }
             }}>Edit</button>
+
+            {/* delete button */}
             <button onClick={() => {
               if(window.confirm('Do you want to delete')){
                 fetch("/api/delete", {
@@ -142,9 +169,9 @@ export function App() {
         ))}
         </ol>
       </div>
-      <div id="ModifyTaskDiv">
-        <ModifyTask defaultTask={modifyTasks[0].name} defaultDesc={modifyTasks[0].description} defaultDeadline={modifyTasks[0].deadline}/>
-      </div>
+        <div id="ModifyTaskDiv" style={{display : edit? "block" : "none"}}>
+        <ModifyTask defaultTask={modifyTasks[0].name} defaultDesc={modifyTasks[0].description} defaultDeadline={modifyTasks[0].deadline} id={modifyTasks[0].id}/>
+        </div>
       
     </div>
   );

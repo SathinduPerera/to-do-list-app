@@ -50,6 +50,11 @@ app.post("/api/delete", (req, res) => {
 
 })
 
+app.post("/api/edit/post", (req, res) => {
+    console.log(req.body)
+    res.json({"message" : "Data edited successfully"})
+})
+
 app.post("/api/edit", (req, res) => {
     sql = `SELECT * FROM tasks WHERE id = ?`
     db.all(sql, [req.body.id], (err, data) => {
