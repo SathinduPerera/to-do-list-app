@@ -121,11 +121,22 @@ export function App() {
     fetch("/api").then(response => response.json()).then(data => {
       settasks(data)
       })
+    
   }
 
   useEffect(() => {
     fetchTasks()
   }, [])
+  
+  useEffect(() => {
+    tasks.forEach((element) => {
+      if(Date.parse(element.deadline) - Date.now() <= 8640000 ){
+        console.log(`${element.name} : today`)
+      } else {
+        console.log(`${element.name} : not today`)
+      }
+    })
+  }, [tasks])
 
   return (
     <div className="App">
