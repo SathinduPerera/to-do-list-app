@@ -145,6 +145,12 @@ export function App() {
       } else {
         console.log(`${element.name} : not today`)
       }
+      
+      let checkElement = document.getElementById("taskDone_" + element.id)
+
+      if(element.status === "Done"){
+        checkElement.checked = true;
+      }
     })
   }, [tasks])
 
