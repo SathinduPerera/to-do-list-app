@@ -16,16 +16,11 @@ export function TaskEnter(){
       Deadline: deadline.current.value.replace("T", " ")
     }
 
-    if(taskObj.Task !== "" && taskObj.Deadline !== ""){   
-      fetch("/api/post", {
-        method: "post", 
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify(taskObj)
-      }).then((response) => response.json()).then((data) => {console.log(data.message)})
-    }else{
-      alert("Please Fill the task form completely")
-    }
-    
+      POSTFunction("/api/post", taskObj, (data) => {
+        console.log(data.message)
+      })
+ 
+   
   }
 
   return (
@@ -49,14 +44,34 @@ export function TaskEnter(){
             <input id='deadline' type="datetime-local" ref={deadline} defaultValue={""}></input>
           </div>
             <div id="deadlineDiv" className='taskFormdata'>
-            <button onClick={addtask}>Add task</button>
-            <button onClick={addtask}>Add another task</button>
+            <button id='addtaskbutton' onClick={() => {
+                  if(task.current.value !== "" && deadline.current.value !== ""){  
+                    addtask();
+                    document.getElementById('addtaskbutton').style.display = "none";
+                    document.getElementById('taskresetbutton').style.display = "inline";
+                  }else{
+                    alert("Please Fill the task form completely")
+                  }
+              }} >Add task</button>
+            <button type='reset' id='taskresetbutton' onClick={() => {
+              document.getElementById('addtaskbutton').style.display = "inline";
+              document.getElementById('taskresetbutton').style.display = "none";
+            }}>Add another task</button>
             <Link to={"/"}><button>Back to home</button></Link>
           </div>
         </form>
       </div>
     </div>
   )
+}
+
+// function for post commamd
+function POSTFunction(location, body, responseFunction){
+  fetch(location, {
+    method: "post",
+    headers: {"Content-Type" : "application/json"},
+    body: JSON.stringify(body)
+  }).then(response => response.json()).then(data => {responseFunction(data)})
 }
 
 
@@ -92,15 +107,12 @@ export function App() {
                   Deadline : newDeadline.current.value.replace("T", " "),
                   Id : id
                 }
-  
-                fetch("/api/edit/post", {
-                  method: "post",
-                  headers: {"Content-Type" : "application/json"},
-                  body: JSON.stringify(modifyObj)
-                }).then(response => response.json()).then(data => {
+
+                POSTFunction("/api/edit/post", modifyObj, (data) => {
                   document.getElementById("ModifyTaskDiv").style.display = "none";
                   window.alert(data.message)
                 })
+  
                 fetchTasks();
               }}>Save</button>
               <button type='reset' onClick={() => {
@@ -147,37 +159,47 @@ export function App() {
         <ol>
         {typeof tasks === "undefined"? <p>No tasks</p> : 
         tasks.map((item, index) => (
-          <li key={index}>{item.name} - {item.description === ""? "No Description" : item.description} - {item.deadline} - {item.status} 
-            <span id='taskControls'><input type='checkbox'/>
+          <li key={index} id={"task_" + item.id} className='tasks'>{item.name} - {item.description === ""? "No Description" : item.description} - {item.deadline} - {item.status} 
+            <span id='taskControls'>
 
-            {/* Edit button */}
-            <button onClick={() => {
-              fetch("/api/edit", {
-                method: "post",
-                headers: {"Content-Type" : "application/json"},
-                body: JSON.stringify({"id" : item.id})
-              }).then(response => response.json()).then(data => {
-                setmodifyTasks(data);
-              })
-              setedit(true)
-              if(document.getElementById("ModifyTaskDiv") !== null) {
-                document.getElementById("ModifyTaskDiv").style.display = "block"
-              }
-            }}>Edit</button>
+              {/* checkbox */}
+              <input id={'taskDone_' + item.id} value={"done"} type='checkbox' onChange={(e) => {
 
-            {/* delete button */}
-            <button onClick={() => {
-              if(window.confirm('Do you want to delete')){
-                fetch("/api/delete", {
-                  method: "post",
-                  headers: {"Content-Type" : "application/json"},
-                  body: JSON.stringify({"id": item.id})
-                }).then(response => response.json()).then(data => console.log(data.message))
-                fetchTasks();
-              } else {
-                window.alert("Task not deleted")
-              }
-            }}>Delete</button></span>
+                if(e.target.checked){
+                  console.log(e.target.value)
+                  e.target.parentElement.parentElement.style.textDecoration = "line-through"
+                } else {
+                  e.target.parentElement.parentElement.style.textDecoration = "none"
+                }
+                POSTFunction("/api/post/status", {"id" : item.id, "status" : e.target.checked? true : false}, (data) => {
+                  console.log(data.message)
+                })
+              }}/>
+
+              {/* Edit button */}
+              <button onClick={() => {
+                // fetch command to get data of id to fill in the default text inputs on render 
+                POSTFunction("/api/edit", {"id" : item.id}, (data) => setmodifyTasks(data))
+
+                setedit(true)
+                if(document.getElementById("ModifyTaskDiv") !== null) {
+                  document.getElementById("ModifyTaskDiv").style.display = "block"
+                }
+              }}>Edit</button>
+
+              {/* delete button */}
+              <button onClick={() => {
+                if(window.confirm('Do you want to delete')){
+
+                  POSTFunction("/api/delete", {"id": item.id}, (data) => {
+                    console.log(data.message)
+                  })
+                  fetchTasks();
+                } else {
+                  window.alert("Task not deleted")
+                }
+              }}>Delete</button>
+            </span>
           </li>
         ))}
         </ol>

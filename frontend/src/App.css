@@ -18,3 +18,11 @@
   transition: 0.2s;
   padding: 20px;
 }
+
+#taskresetbutton{
+  display: none;
+}
+
+.tasks{
+  padding: 5px;
+}
