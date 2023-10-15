@@ -19,8 +19,6 @@ export function TaskEnter(){
       POSTFunction("/api/post", taskObj, (data) => {
         console.log(data.message)
       })
- 
-   
   }
 
   return (
@@ -151,7 +149,7 @@ export function App() {
   }, [tasks])
 
   return (
-    <div className="App">
+    <div className="App" >
       <div id="detail_bar">
         <Link to={"/AddTask"}><button>Add task</button></Link>
       </div>
@@ -159,11 +157,11 @@ export function App() {
         <ol>
         {typeof tasks === "undefined"? <p>No tasks</p> : 
         tasks.map((item, index) => (
-          <li key={index} id={"task_" + item.id} className='tasks'>{item.name} - {item.description === ""? "No Description" : item.description} - {item.deadline} - {item.status} 
+          <li key={index} id={"task_" + item.id} style={item.status === "Done"? {textDecoration : "line-through"} : {textDecoration : "none"}} className='tasks' >{item.name} - {item.description === ""? "No Description" : item.description} - {item.deadline} - {item.status} 
             <span id='taskControls'>
 
               {/* checkbox */}
-              <input id={'taskDone_' + item.id} value={"done"} type='checkbox' onChange={(e) => {
+              <input id={'taskDone_' + item.id} value="done" type='checkbox' onChange={(e) => {
 
                 if(e.target.checked){
                   console.log(e.target.value)
@@ -174,13 +172,13 @@ export function App() {
                 POSTFunction("/api/post/status", {"id" : item.id, "status" : e.target.checked? true : false}, (data) => {
                   console.log(data.message)
                 })
+                fetchTasks()
               }}/>
 
               {/* Edit button */}
               <button onClick={() => {
                 // fetch command to get data of id to fill in the default text inputs on render 
                 POSTFunction("/api/edit", {"id" : item.id}, (data) => setmodifyTasks(data))
-
                 setedit(true)
                 if(document.getElementById("ModifyTaskDiv") !== null) {
                   document.getElementById("ModifyTaskDiv").style.display = "block"
