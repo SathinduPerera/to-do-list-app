@@ -28,8 +28,19 @@ app.post("/api/post", (req, res) => {
     res.json({"message" : "Data recived successfully"})
 })
 
-app.get("/api", (req, res) => {
-    sql = `SELECT * FROM tasks`
+app.get("/api/pending", (req, res) => {
+    sql = `SELECT * FROM tasks WHERE status = "Pending" ORDER BY deadline`
+    db.all(sql, [], (err, data) => { // error is passed first then data 
+        if(err){
+            console.error(err.message)
+        } else {
+            res.json(data)
+        }
+    });
+})
+
+app.get("/api/done", (req, res) => {
+    sql = `SELECT * FROM tasks WHERE status = "Done" ORDER BY deadline`
     db.all(sql, [], (err, data) => { // error is passed first then data 
         if(err){
             console.error(err.message)

@@ -122,14 +122,18 @@ export function App() {
     )
   }
 
-  const [tasks, settasks] = useState([{}]);
+  const [pendingtasks, setpendingtasks] = useState([{}]);
+  const [donetasks, setdonetasks] = useState([{}]);
 
   const [modifyTasks, setmodifyTasks] = useState([{}])
   const [edit, setedit] = useState(false)
 
   function fetchTasks() {
-    fetch("/api").then(response => response.json()).then(data => {
-      settasks(data)
+    fetch("/api/pending").then(response => response.json()).then(data => {
+      setpendingtasks(data)
+      })
+    fetch("/api/done").then(response => response.json()).then(data => {
+      setdonetasks(data)
       })
     
   }
@@ -139,20 +143,31 @@ export function App() {
   }, [])
   
   useEffect(() => {
-    tasks.forEach((element) => {
+    pendingtasks.forEach((element) => {
       if(Date.parse(element.deadline) - Date.now() <= 8640000 ){
         console.log(`${element.name} : today`)
       } else {
         console.log(`${element.name} : not today`)
       }
-      
+
+      // setting finished tasks as checked on render
       let checkElement = document.getElementById("taskDone_" + element.id)
 
       if(element.status === "Done"){
         checkElement.checked = true;
       }
     })
-  }, [tasks])
+
+    donetasks.forEach((element) => {
+      let checkElement = document.getElementById('setAsPending_' + element.id)
+        checkElement.checked = true;
+    })
+
+    pendingtasks.forEach((element) => {
+      let checkElement = document.getElementById("taskDone_" + element.id)
+        checkElement.checked = false;
+    })
+  }, [pendingtasks, donetasks])
 
   return (
     <div className="App" >
@@ -161,20 +176,14 @@ export function App() {
       </div>
       <div>
         <ol>
-        {typeof tasks === "undefined"? <p>No tasks</p> : 
-        tasks.map((item, index) => (
-          <li key={index} id={"task_" + item.id} style={item.status === "Done"? {textDecoration : "line-through"} : {textDecoration : "none"}} className='tasks' >{item.name} - {item.description === ""? "No Description" : item.description} - {item.deadline} - {item.status} 
+        {typeof pendingtasks === "undefined"? <p>No tasks</p> : 
+        pendingtasks.map((item, index) => (
+          <li key={index} id={"task_" + item.id} className='tasks' >{item.name} - {item.description === ""? "No Description" : item.description} - {item.deadline} - {item.status} 
             <span id='taskControls'>
 
               {/* checkbox */}
               <input id={'taskDone_' + item.id} value="done" type='checkbox' onChange={(e) => {
 
-                if(e.target.checked){
-                  console.log(e.target.value)
-                  e.target.parentElement.parentElement.style.textDecoration = "line-through"
-                } else {
-                  e.target.parentElement.parentElement.style.textDecoration = "none"
-                }
                 POSTFunction("/api/post/status", {"id" : item.id, "status" : e.target.checked? true : false}, (data) => {
                   console.log(data.message)
                 })
@@ -206,6 +215,52 @@ export function App() {
             </span>
           </li>
         ))}
+        </ol>
+
+        <h1>Done</h1>
+              
+        {/* Rendering tasks that are done */}
+        <ol>
+        {typeof donetasks === "undefined"? <p>No tasks</p> : 
+        donetasks.map((item, index) => (
+          <li key={index} id={"task_" + item.id} style={{textDecoration : "line-through"}} className='tasks' >{item.name} - {item.description === ""? "No Description" : item.description} - {item.deadline} - {item.status} 
+            <span id='DoneTaskControls'>
+
+              {/* checkbox */}
+              <input id={'setAsPending_' + item.id} value="done" type='checkbox' onChange={(e) => {
+
+                POSTFunction("/api/post/status", {"id" : item.id, "status" : e.target.checked? true : false}, (data) => {
+                  console.log(data.message)
+                })
+                fetchTasks()
+              }}/>
+
+              {/* Edit button */}
+              <button onClick={() => {
+                // fetch command to get data of id to fill in the default text inputs on render 
+                POSTFunction("/api/edit", {"id" : item.id}, (data) => setmodifyTasks(data))
+                setedit(true)
+                if(document.getElementById("ModifyTaskDiv") !== null) {
+                  document.getElementById("ModifyTaskDiv").style.display = "block"
+                }
+              }}>Edit</button>
+
+              {/* delete button */}
+              <button onClick={() => {
+                if(window.confirm('Do you want to delete')){
+
+                  POSTFunction("/api/delete", {"id": item.id}, (data) => {
+                    console.log(data.message)
+                  })
+                  fetchTasks();
+                } else {
+                  window.alert("Task not deleted")
+                }
+              }}>Delete</button>
+            </span>
+          </li>
+        ))}
+
         </ol>
       </div>
         <div id="ModifyTaskDiv" style={{display : edit? "block" : "none"}}>
