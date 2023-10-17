@@ -176,7 +176,7 @@ export function App() {
       </div>
       <div>
         <ol>
-        {typeof pendingtasks === "undefined"? <p>No tasks</p> : 
+        {typeof pendingtasks === "undefined" || pendingtasks.length === 0? <p>Well done! You have no pending tasks</p> : 
         pendingtasks.map((item, index) => (
           <li key={index} id={"task_" + item.id} className='tasks' >{item.name} - {item.description === ""? "No Description" : item.description} - {item.deadline} - {item.status} 
             <span id='taskControls'>
@@ -217,11 +217,11 @@ export function App() {
         ))}
         </ol>
 
-        <h1>Done</h1>
+        <h2>Completed Tasks</h2>
               
         {/* Rendering tasks that are done */}
         <ol>
-        {typeof donetasks === "undefined"? <p>No tasks</p> : 
+        {typeof donetasks === "undefined" || donetasks.length === 0? <p>No tasks completed</p> : 
         donetasks.map((item, index) => (
           <li key={index} id={"task_" + item.id} style={{textDecoration : "line-through"}} className='tasks' >{item.name} - {item.description === ""? "No Description" : item.description} - {item.deadline} - {item.status} 
             <span id='DoneTaskControls'>

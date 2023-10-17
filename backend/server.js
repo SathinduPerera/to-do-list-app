@@ -8,11 +8,16 @@ let sql;
 
 app.use(bodyParser.json())
 
-const db = new sqlite3.Database("./todolist.db", sqlite3.OPEN_READWRITE, (err) => {
+const db = new sqlite3.Database('./todos.db', sqlite3.OPEN_CREATE | sqlite3.OPEN_READWRITE, (err) => {
     if(err){
         console.log(err.message)
     }
+
 })
+
+sql = 'CREATE TABLE IF NOT EXISTS "tasks" ("id"	INTEGER, "name"	VARCHAR(255) NOT NULL, "description" TEXT NOT NULL,"deadline" TIMESTAMP NOT NULL, "created"	TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, "status"	VARCHAR(255) NOT NULL DEFAULT Pending, PRIMARY KEY("id" AUTOINCREMENT) );'
+db.run(sql)
+
 
 function insertRow(name, description, deadline){
     sql = `INSERT INTO tasks(name, description, deadline) VALUES (?, ?, ?)`
@@ -97,7 +102,6 @@ app.post("/api/edit", (req, res) => {
         }       
     })
 })
-
 
 
 app.listen(5000, ()=> {

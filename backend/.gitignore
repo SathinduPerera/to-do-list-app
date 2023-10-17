@@ -1,3 +1,4 @@
 /node_modules
 
-todolist.db
+/todolist.db
+/todos.db
