@@ -15,7 +15,14 @@ const db = new sqlite3.Database('./todos.db', sqlite3.OPEN_CREATE | sqlite3.OPEN
 
 })
 
-sql = 'CREATE TABLE IF NOT EXISTS "tasks" ("id"	INTEGER, "name"	VARCHAR(255) NOT NULL, "description" TEXT NOT NULL,"deadline" TIMESTAMP NOT NULL, "created"	TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, "status"	VARCHAR(255) NOT NULL DEFAULT Pending, PRIMARY KEY("id" AUTOINCREMENT) );'
+sql = 'CREATE TABLE IF NOT EXISTS "tasks" ' + 
+        '("id"	INTEGER, "name"	VARCHAR(255) NOT NULL,'+
+        '"description" TEXT NOT NULL,'+
+        '"deadline" TIMESTAMP NOT NULL,' +
+        '"created" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,'+
+        '"status" VARCHAR(255) NOT NULL DEFAULT Pending,' +
+        'PRIMARY KEY("id" AUTOINCREMENT)'+
+        ');'
 db.run(sql)
 
 
